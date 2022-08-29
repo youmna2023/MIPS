@@ -1,5 +1,6 @@
 # MIPS
 Computer architecture project >> single-cycle MIPS processor
+
 Reference:
 Digital Design and Computer Architecture second edition by David & Sarah 
 Harris, chapter 7
