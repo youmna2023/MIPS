@@ -1,31 +1,236 @@
-# -------------------------------------------------------------------------- #
-#
-# Copyright (C) 2020  Intel Corporation. All rights reserved.
-# Your use of Intel Corporation's design tools, logic functions 
-# and other software and tools, and any partner logic 
-# functions, and any output files from any of the foregoing 
-# (including device programming or simulation files), and any 
-# associated documentation or information are expressly subject 
-# to the terms and conditions of the Intel Program License 
-# Subscription Agreement, the Intel Quartus Prime License Agreement,
-# the Intel FPGA IP License Agreement, or other applicable license
-# agreement, including, without limitation, that your use is for
-# the sole purpose of programming logic devices manufactured by
-# Intel and sold by Intel or its authorized distributors.  Please
-# refer to the applicable agreement for further details, at
-# https://fpgasoftware.intel.com/eula.
-#
-# -------------------------------------------------------------------------- #
-#
-# Quartus Prime
-# Version 20.1.0 Build 711 06/05/2020 SJ Lite Edition
-# Date created = 20:42:52  September 25, 2021
-#
-# -------------------------------------------------------------------------- #
+module controlunit
+(
+ input [5:0] opcode,
+ input [5:0] funct, //we describe main decoder not ALU decoder so this variable is not used
+ 
+ output reg mem_write,
+ output reg [1:0]mem_toreg,
+ output reg branch,
+ output reg alu_src,
+ output reg[1:0] reg_dst,
+ output reg reg_write,
+ output reg [1:0] alu_op,
+ output reg jump,
+ output reg logic
+ 
+ );
+ 
+ always@(*)
+ begin
+ if(opcode==6'b000011)
+   begin
+    mem_toreg[1]=1'b1;
+    reg_dst[1]=1'b1; 
+   end
+ else begin
+   mem_toreg[1]=1'b0;
+   reg_dst[1]=1'b0;
+ end 
+ if (opcode==6'b001101)
+   logic=1'b1;
+ else logic=1'b0;
+   
+ case(opcode)
+ 
+    6'b000000: //R_Type
+ 
+           begin
+ 
+                  reg_dst[0]=1;
+ 
+                  alu_src=0;
+ 
+                  mem_toreg[0]=0;
+ 
+                  reg_write=1;
+ 
+                  mem_write=0;
+ 
+                  branch=0;
+ 
+                  alu_op=2'b10;
+ 
+                  jump=0;
+ 
+           end
+ 
+    6'b100011: //lw
+ 
+           begin
+ 
+                  reg_dst[0]=0;
+ 
+                  alu_src=1;
+ 
+                  mem_toreg[0]=1;
+ 
+                  reg_write=1;
+ 
+                  mem_write=0;
+ 
+                  branch=0;
+ 
+                  alu_op=2'b00;
+ 
+                  jump=0;
+ 
+           end
+ 
+    6'b101011: //sw
+ 
+           begin
+ 
+                  reg_dst[0]=1'bx;
+ 
+                  alu_src=1;
+ 
+                  mem_toreg[0]=1'bx;
+ 
+                  reg_write=0;
+ 
+                  mem_write=1;
+ 
+                  branch=0;
+ 
+                  alu_op=2'b00;
+ 
+                  jump=0;
+ 
+           end
+ 
+    6'b000010: //jump
+ 
+           begin
+ 
+                  reg_dst[0]=1'bx;
+ 
+                  alu_src=1'bx;
+ 
+                  mem_toreg[0]=1'bx;
+ 
+                  reg_write=0;
+ 
+                  mem_write=0;
+ 
+                  branch=1'bx;
+ 
+                  alu_op=2'bxx;
+ 
+                  jump=1;
+ 
+           end
+ 
+6'b000011: //jal
+ 
+           begin
+ 
+                  reg_dst[0]=1'b0;
+ 
+                  alu_src=1'bx;
+ 
+                  mem_toreg[0]=1'b0;
+ 
+                  reg_write=1;
+ 
+                  mem_write=0;
+ 
+                  branch=1'bx;
+ 
+                  alu_op=2'b00;
+ 
+                  jump=1;
+ 
+           end
+ 
+    6'b000100: //beq
+ 
+           begin
+ 
+                  reg_dst[0]=1'bx;
+ 
+                  alu_src=0;
+ 
+                  mem_toreg[0]=1'bx;
+ 
+                  reg_write=0;
+ 
+                  mem_write=0;
+ 
+                  branch=1;
+ 
+                  alu_op=2'b01;
+ 
+                  jump=0;
+ 
+           end
+ 
+          
+ 
+    6'b001000: //addi
 
-QUARTUS_VERSION = "20.1"
-DATE = "20:42:52  September 25, 2021"
+           begin
+ 
+                  reg_dst[0]=0;
+ 
+                  alu_src=1;
+ 
+                 mem_toreg[0]=0;
+ 
+                  reg_write=1;
+ 
+                  mem_write=0;
+ 
+                  branch=0;
+ 
+                  alu_op=2'b11;
+ 
+                  jump=0;
+ 
+           end
+ 
+     6'b001101: //ori
 
-# Revisions
+           begin
+ 
+                  reg_dst[0]=0;
+ 
+                  alu_src=1;
+ 
+                  mem_toreg[0]=0;
+ 
+                  reg_write=1;
+ 
+                  mem_write=0;
+ 
+                  branch=0;
+ 
+                  alu_op=2'b11;
+ 
+                  jump=0;
+ 
+           end
+   
+ 
+    default://look @ function
+ 
+           begin
+ 
+                  reg_dst[0]=1;
+ 
+                  alu_src=0;
 
-PROJECT_REVISION = "controlunit"
+                  mem_toreg[0]=0;
+ 
+                  reg_write=1;
+ 
+                  mem_write=0;
+ 
+                  branch=0;
+ 
+                  alu_op=2'b10;
+ 
+           end
+ 
+ endcase
+end
+endmodule
